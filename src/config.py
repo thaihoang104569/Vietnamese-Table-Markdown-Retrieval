@@ -14,8 +14,8 @@ class Config:
     DENSE_DOC_IDS_PATH = os.path.join(BASE_DIR, "dense_doc_ids.json")
 
     # Models Configuration
-    # GreenNode/M3-GN-VN is a custom fine-tuned model for this specific dataset
-    DENSE_MODEL_NAME = "GreenNode/M3-GN-VN" 
+    # BGE-M3: public multilingual embedding model (multi-lingual + multi-functionality)
+    DENSE_MODEL_NAME = "BAAI/bge-m3"
     RERANK_MODEL_NAME = "BAAI/bge-reranker-v2-m3"
     LLM_MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
 

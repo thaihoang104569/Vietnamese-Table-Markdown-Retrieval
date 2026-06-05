@@ -154,3 +154,6 @@ cython_debug/
 
 # VS Code
 .vscode/
+
+# CLAUDE.md — local tooling instructions, not for version control
+/CLAUDE.md

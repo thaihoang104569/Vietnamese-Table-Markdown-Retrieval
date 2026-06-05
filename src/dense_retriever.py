@@ -29,13 +29,13 @@ class DenseRetriever:
                 self.doc_ids.append(item["_id"])
                 texts.append(item["text"])
                 
-        print(f"Encoding {len(texts)} documents (this might take a while, GPU is highly recommended)...")
-        # Encode in batches
+        # BGE-M3 returns L2-normalized vectors by default with normalize_embeddings=True
+        # FAISS IndexFlatIP (Inner Product) is equivalent to Cosine Similarity
         embeddings = self.model.encode(
-            texts, 
-            batch_size=32, 
-            show_progress_bar=True, 
-            normalize_embeddings=True # We normalize to perform Cosine Similarity via Inner Product
+            texts,
+            batch_size=32,
+            show_progress_bar=True,
+            normalize_embeddings=True
         )
         
         embeddings = np.array(embeddings).astype("float32")
