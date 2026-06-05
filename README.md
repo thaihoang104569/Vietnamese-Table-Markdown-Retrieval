@@ -1,4 +1,4 @@
-# Vietnamese Table Markdown Retrieval & RAG Pipeline
+# Vietnamese Table Markdown Retrieval
 
 > **Một pipeline Retrieval-Augmented Generation (RAG) hiện đại dành riêng cho việc truy xuất thông tin từ bảng Markdown tiếng Việt**, được xây dựng trên bộ dữ liệu [GreenNode/GreenNode-Table-Markdown-Retrieval-VN](https://huggingface.co/datasets/GreenNode/GreenNode-Table-Markdown-Retrieval-VN).
 
@@ -156,12 +156,12 @@ IR/
 
 ## Yêu cầu hệ thống
 
-| Thành phần | Tối thiểu | Khuyến nghị (Kaggle T4) |
+| Thành phần | Tối thiểu |
 |---|---|---|
-| **Python** | 3.10+ | 3.10+ |
-| **RAM** | 16 GB | 16 GB |
-| **GPU VRAM** | Không bắt buộc (CPU) | 16 GB (T4 GPU) |
-| **Dung lượng đĩa** | ~15 GB (data + model weights) | ~20 GB |
+| **Python** | 3.10+ | 
+| **RAM** | 16 GB |
+| **GPU VRAM** | Không bắt buộc (CPU) | 
+| **Dung lượng đĩa** | ~15 GB (data + model weights) | 
 
 > **Lưu ý:** Việc mã hóa 44,678 tài liệu (Dense Indexing) và chạy LLM Generator đòi hỏi GPU. Trên CPU, chỉ nên dùng BM25 retrieval và bỏ qua bước Dense + LLM.
 
@@ -301,37 +301,6 @@ class Config:
     LLM_MAX_NEW_TOKENS = 300
     LLM_TEMPERATURE    = 0.1  # Greedy-ish decoding cho câu trả lời thực tế
 ```
-
----
-
-## Chạy trên Kaggle
-
-Dự án được tối ưu hóa để chạy trên **Kaggle Notebooks (T4 GPU — miễn phí)**.
-
-### Bước 1: Upload dự án lên Kaggle
-
-Nén thư mục `src/` và upload lên Kaggle Dataset, hoặc sử dụng Kaggle API.
-
-### Bước 2: Tạo Notebook mới với GPU T4
-
-Trong Kaggle Notebook, chọn **Settings → Accelerator → GPU T4 x2**.
-
-### Bước 3: Chạy các lệnh
-
-```python
-# Cài đặt thư viện
-!pip install sentence-transformers faiss-gpu rank-bm25 underthesea transformers bitsandbytes accelerate
-
-# (Dữ liệu đã có sẵn trong /kaggle/input/...)
-
-# Xử lý dữ liệu
-!python -m src.process_data
-
-# Chạy đánh giá đầy đủ với LLM
-!python -m src.evaluate --with-llm --sample-size 500
-```
-
-> **Lưu ý:** Trên Kaggle, thay `faiss-cpu` bằng `faiss-gpu` để tận dụng GPU cho indexing nhanh hơn.
 
 ---
 
