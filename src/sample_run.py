@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import argparse
 
 # Reconfigure encoding for Windows console
 sys.stdout.reconfigure(encoding='utf-8')
@@ -11,8 +12,18 @@ from src.bm25_retriever import BM25Retriever
 from src.dense_retriever import DenseRetriever
 from src.fusion import reciprocal_rank_fusion
 from src.reranker import Reranker
+from src.generator import LLMGenerator
 
 def main():
+    parser = argparse.ArgumentParser(description="Pipeline integration test on mini sample")
+    parser.add_argument(
+        "--query",
+        type=str,
+        default=None,
+        help="Query to run (if omitted, you will be prompted to type one)"
+    )
+    args = parser.parse_args()
+
     print("="*60)
     print("STARTING PIPELINE INTEGRATION TEST ON MINI SAMPLE")
     print("="*60)
@@ -50,11 +61,14 @@ def main():
     reranker = Reranker()
     reranker.load_model(Config.RERANK_MODEL_NAME)
 
-    # 5. Run a sample query
-    # Look for query matching one of our documents.
-    # The first document has model M1, M2, M3, M4 table.
-    query = "Model nào có công suất 3000W?"
-    print(f"\nRunning test query: '{query}'")
+    # 5. Run query
+    if args.query:
+        query = args.query
+    else:
+        query = input("\nNhập câu hỏi của bạn: ").strip()
+        if not query:
+            query = "Model nào có công suất 3000W?"
+    print(f"\nRunning query: '{query}'")
     
     print("\n[Step 1] Lexical Retrieval (BM25)...")
     bm25_res = bm25.retrieve(query, top_k=10)
@@ -81,25 +95,16 @@ def main():
     for r in reranked_res:
         print(f"  Doc ID: {r['corpus-id']} | Reranked Score: {r['score']:.4f}")
 
-    # 6. Show how LLM prompt would be constructed
-    print("\n[Step 5] Mock LLM Prompt Construction:")
-    top_doc_id = reranked_res[0]["corpus-id"]
-    top_doc_text = corpus_map[top_doc_id]
-    
-    prompt = (
-        f"<|im_start|>system\n"
-        f"Bạn là một trợ lý AI chuyên nghiệp của GreenNode. Hãy trả lời câu hỏi của người dùng "
-        f"một cách ngắn gọn, chính xác dựa trên thông tin bảng và dữ liệu ngữ cảnh được cung cấp bên dưới.\n"
-        f"<|im_end|>\n"
-        f"<|im_start|>user\n"
-        f"Dữ liệu ngữ cảnh tham khảo:\n[Tài liệu tham khảo 1]:\n{top_doc_text}\n\n"
-        f"Câu hỏi: {query}\n"
-        f"<|im_end|>\n"
-        f"<|im_start|>assistant\n"
-    )
-    print("-"*50)
-    print(prompt)
-    print("-"*50)
+    # 6. Generate answer with LLM (full RAG)
+    print("\n[Step 5] Loading LLM and generating answer...")
+    generator = LLMGenerator()
+    generator.load_model(Config.LLM_MODEL_NAME)
+
+    answer = generator.generate(query, reranked_res, corpus_map)
+    print("\n" + "="*60)
+    print(f"Câu hỏi: {query}")
+    print(f"Câu trả lời: {answer}")
+    print("="*60)
 
     # 7. Clean up temporary mini files
     print("\nCleaning up temporary test files...")
