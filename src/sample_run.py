@@ -125,9 +125,22 @@ def main():
             # 6. Generate answer with LLM (full RAG)
             print("\n[Step 5] Generating answer with LLM...")
             answer = generator.generate(query, reranked_res, corpus_map)
+
+            # Display retrieved documents and LLM answer
             print("\n" + "="*60)
             print(f"Câu hỏi: {query}")
-            print(f"Câu trả lời: {answer}")
+            print("\nTài liệu được truy xuất:")
+            for i, doc in enumerate(reranked_res[:3]):  # Show top 3
+                doc_id = doc["corpus-id"]
+                score = doc["score"]
+                doc_text = corpus_map.get(doc_id, "Không tìm thấy tài liệu")
+                # Truncate text for display
+                display_text = doc_text[:200] + "..." if len(doc_text) > 200 else doc_text
+                print(f"  [{i+1}] ID: {doc_id} | Score: {score:.4f}")
+                print(f"      Nội dung: {display_text}")
+
+            print("\nCâu trả lời từ LLM:")
+            print(answer)
             print("="*60)
 
         except KeyboardInterrupt:
